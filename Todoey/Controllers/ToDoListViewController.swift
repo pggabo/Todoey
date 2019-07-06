@@ -9,7 +9,7 @@
 import UIKit
 import CoreData
 
-class ToDoListViewController: UITableViewController, UISearchBarDelegate {
+class ToDoListViewController: UITableViewController {
     
     
     var itemArray = [Item]()
@@ -19,13 +19,13 @@ class ToDoListViewController: UITableViewController, UISearchBarDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
-        loadItems()
+        let request : NSFetchRequest<Item> = Item.fetchRequest()
+        loadItems(with: request)
         
         // Do any additional setup after loading the view.
     }
     
-    //MARK - Tableview datasource methods
+    //MARK: - Tableview datasource methods
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return itemArray.count
@@ -43,7 +43,7 @@ class ToDoListViewController: UITableViewController, UISearchBarDelegate {
         return cell
     }
     
-    // MARK - Tableview Delegate Methods
+    // MARK: - Tableview Delegate Methods
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         //print (itemArray[indexPath.row])
@@ -56,7 +56,7 @@ class ToDoListViewController: UITableViewController, UISearchBarDelegate {
         
     }
     
-    //MARK - Add new items
+    //MARK: - Add new items
     
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         
@@ -87,7 +87,7 @@ class ToDoListViewController: UITableViewController, UISearchBarDelegate {
         
     }
     
-    //MARK - Model Manipulation Methods
+    //MARK: - Model Manipulation Methods
     
     func saveItems() {
         
@@ -101,8 +101,7 @@ class ToDoListViewController: UITableViewController, UISearchBarDelegate {
         self.tableView.reloadData()
     }
     
-    func loadItems() {
-        let request : NSFetchRequest<Item> = Item.fetchRequest()
+    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest()) {
         do {
             itemArray = try context.fetch(request)
         }
@@ -110,5 +109,21 @@ class ToDoListViewController: UITableViewController, UISearchBarDelegate {
             print (error)
         }
     }
+    
+   
 }
 
+//MARK: - SearchBar Methods
+extension ToDoListViewController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        let request : NSFetchRequest<Item> = Item.fetchRequest()
+        
+        request.predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
+        
+        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        
+        loadItems(with: request)
+
+    }
+    
+}
