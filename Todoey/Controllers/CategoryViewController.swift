@@ -18,7 +18,7 @@ class CategoryViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        loadItems()
+        loadCategories()
 
     }
     //MARK: - Tableview DataSource Methods
@@ -27,6 +27,7 @@ class CategoryViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
         let categoryCell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
         
         let category = categoryArray[indexPath.row]
@@ -40,6 +41,15 @@ class CategoryViewController: UITableViewController {
     //MARK: - Tableview Delegate Methods
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
+        performSegue(withIdentifier: "goToItems", sender: self)
+        
+    }
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let destinationVC = segue.destination as! ToDoListViewController
+        
+        if let indexPath = tableView.indexPathForSelectedRow {
+            destinationVC.selectedCategory = categoryArray[indexPath.row]
+        }
     }
     
     
@@ -49,20 +59,20 @@ class CategoryViewController: UITableViewController {
         
         //        let defaults = UserDefaults.standard
         
-        let alert = UIAlertController(title: "Add new Todoey item", message: "", preferredStyle: .alert)
-        let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
+        let alert = UIAlertController(title: "Add new category", message: "", preferredStyle: .alert)
+        let action = UIAlertAction(title: "Add", style: .default) { (action) in
             //what will happen once the user clicks the add button on our UIAlert
             
-            let newItem = Category(context: self.context)
+            let newCategory = Category(context: self.context)
             
-            newItem.name = textfield.text!
-            self.categoryArray.append(newItem)
+            newCategory.name = textfield.text!
+            self.categoryArray.append(newCategory)
             
-            self.saveItems()
+            self.saveCategories()
             
         }
         alert.addTextField { (alertTextField) in
-            alertTextField.placeholder = "Create new item"
+            alertTextField.placeholder = "Create new category"
             textfield = alertTextField
         }
         
@@ -73,7 +83,7 @@ class CategoryViewController: UITableViewController {
     
     //MARK: - Model Manipulation Methods
     
-    func saveItems() {
+    func saveCategories() {
         
         do{
             try context.save ()
@@ -85,7 +95,7 @@ class CategoryViewController: UITableViewController {
         self.tableView.reloadData()
     }
     
-    func loadItems(with request: NSFetchRequest<Category> = Category.fetchRequest()) {
+    func loadCategories(with request: NSFetchRequest<Category> = Category.fetchRequest()) {
         
         do {
             categoryArray = try context.fetch(request)
@@ -97,8 +107,5 @@ class CategoryViewController: UITableViewController {
         tableView.reloadData()
         
     }
-    
-    //MARK: - Data Manipulation Methods
-    
     
 }
